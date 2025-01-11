@@ -9,7 +9,9 @@ import { motion, AnimatePresence } from "framer-motion";
 declare global {
   interface Window {
     onYouTubeIframeAPIReady: () => void;
-    YT: any;
+    YT: {
+      Player: new (elementId: string, config: unknown) => void;
+    };
   }
 }
 
@@ -116,7 +118,8 @@ export default function Home() {
 
   // Эффект для уменьшения громкости всего сайта
   useEffect(() => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || 
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
     const gainNode = audioContext.createGain();
     gainNode.gain.value = 0.1; // 10% громкости
 
@@ -169,7 +172,8 @@ export default function Home() {
   return (
     <div 
       ref={containerRef}
-      className="relative min-h-screen bg-black overflow-hidden flex items-center justify-center"
+      className={`relative min-h-screen bg-black overflow-hidden flex items-center justify-center
+                 ${isPulsing ? 'scale-105' : ''}`}
     >
       {/* Фоновый градиент */}
       <div className="absolute inset-0 bg-gradient-radial from-purple-900/20 via-black to-black animate-pulse-slow z-0" />
@@ -400,6 +404,12 @@ export default function Home() {
             )}
           </AnimatePresence>
         </>
+      )}
+
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 right-4 text-white text-xs opacity-50">
+          Key sequence: {keySequence}
+        </div>
       )}
     </div>
   );
