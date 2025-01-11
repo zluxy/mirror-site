@@ -9,6 +9,22 @@ export default function Home() {
   const mirrorRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentImage, setCurrentImage] = useState("/asgasg.png");
+  const [showRandomImage, setShowRandomImage] = useState(false);
+  const [imagePosition, setImagePosition] = useState('left'); // 'left' или 'right'
+
+  // Эффект для случайного появления изображения
+  useEffect(() => {
+    const checkRandom = () => {
+      if (Math.random() < 0.05) { // 5% шанс
+        setImagePosition(Math.random() < 0.5 ? 'left' : 'right');
+        setShowRandomImage(true);
+        setTimeout(() => setShowRandomImage(false), 3000); // Скрываем через 3 секунды
+      }
+    };
+
+    const interval = setInterval(checkRandom, 2000); // Проверяем каждые 2 секунды
+    return () => clearInterval(interval);
+  }, []);
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadFireworksPreset(engine);
@@ -52,6 +68,24 @@ export default function Home() {
       ref={containerRef}
       className="relative min-h-screen bg-black overflow-hidden flex items-center justify-center"
     >
+      {/* Случайное изображение */}
+      {showRandomImage && (
+        <div 
+          className={`absolute z-20 w-32 h-32 transition-all duration-[3000ms] ease-in-out
+            ${imagePosition === 'left' 
+              ? 'animate-slide-left-to-right' 
+              : 'animate-slide-right-to-left'}`}
+        >
+          <Image
+            src="/52B2EFF2-0D50-4C4D-9237-25D3C1B04A4A.png"
+            alt="Random image"
+            width={128}
+            height={128}
+            className="object-contain"
+          />
+        </div>
+      )}
+
       <Particles
         id="tsparticles"
         init={particlesInit}
